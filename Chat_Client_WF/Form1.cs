@@ -21,7 +21,7 @@ namespace Chat_Client_WF
         public string message = string.Empty;
         public string ansver = string.Empty;
 
-        public List<MyClasses.User> users = new List<MyClasses.User>
+        public List<MyClasses.User> users = new List<MyClasses.User>//лист нужно добыть из сохраненного в базе данных
         {
             new MyClasses.User { Id = 1, Name = "Patric", Status = false},
             new MyClasses.User { Id = 2, Name = "Tatyana", Status = false},
@@ -31,11 +31,11 @@ namespace Chat_Client_WF
         {
             InitializeComponent();
 
-            Task.Run(Connect);
+            Task.Run(Connect);//пытаемся подключится к серверу
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)//авторизация на минималках
         {
 
             int id;//мы для учебных целе используем ID
@@ -43,12 +43,12 @@ namespace Chat_Client_WF
             {
                 if (s.Connected)
                 {
-                    string ID = LoginBox.Text;
+                    string ID = LoginBox.Text;//вмесло логина пишем ID из существующих юзеров. см выше)))
                     s.Send(Encoding.UTF8.GetBytes(ID));
                     byte[] buffer = new byte[1024];
                     var l = s.Receive(buffer);
                     ansver = Encoding.UTF8.GetString(buffer, 0, l);
-                    if (ansver != "0")
+                    if (ansver != "0")//если от сервера приходит вменяемый ответ
                     {
                         User temp = users.First(p => p.Id == int.Parse(ID));
                         this.Text = $"Сервер подключен! Пользователь [{temp.Name}]";
@@ -67,11 +67,11 @@ namespace Chat_Client_WF
                             if (u.Id != int.Parse(LoginBox.Text))
                                 Users.Items.Add(u.Name);
                         }
-                        Task.Run(Listen);
+                        Task.Run(Listen);//слушаем все входящие
                     }
                     else
                     {
-                        MessageBox.Show("Error!!!");
+                        MessageBox.Show("Error!!!");//такого юзера нет
                     }
                 }
 
@@ -98,7 +98,7 @@ namespace Chat_Client_WF
                 MessageSend.Text = "";
             }
         }
-        private void Listen()
+        private void Listen()//слушем и если нам приходит что то, оно добавляетс в лист сообщений
         {
             while (s.Connected)
             {
@@ -117,7 +117,7 @@ namespace Chat_Client_WF
             }
 
         }
-        private void Connect()
+        private void Connect()//проверка подключения.
         {
             while (!s.Connected)
             {

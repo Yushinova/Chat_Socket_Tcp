@@ -35,7 +35,7 @@ namespace Chat_Server
                 while (true)
                 {
                     Socket ns = s.Accept();
-                    Task.Run(() => ReceiveSend(ns));
+                    Task.Run(() => ReceiveSend(ns));//для каждого юзера создаем задачу
 
 
                 }
@@ -48,42 +48,43 @@ namespace Chat_Server
             {
                 s.Close();
             }
-            void ReceiveSend(Socket client)
+            void ReceiveSend(Socket client)//логика вся, нужно разбить на фунукции
             {
                 bool isCorrect = false;
                 MyClasses.User temp = new MyClasses.User();
                 int ind;
-                while (!isCorrect)
+                while (!isCorrect)//авторизация на минималках 
                 {
+                   //клиент отправляет запрос с ID иил логином
                     isCorrect = false;
                     var byffer = new byte[1024];
                     var l = client.Receive(byffer);
                     int ansver = Convert.ToInt32(Encoding.UTF8.GetString(byffer, 0, l));
                     Console.WriteLine(Encoding.UTF8.GetString(byffer, 0, l));
-                    if (users.Any(p => p.Id == ansver))
+                    if (users.Any(p => p.Id == ansver))//если есть такой товарищ изменяем его в листе, устанавливаем новый соккет для него
                     {
 
                         temp = users.First(p => p.Id == ansver);
                         temp.socket = client;
                         temp.Status = true;
-                        client.Send(Encoding.UTF8.GetBytes($"Hello {temp.Name}"));
+                        client.Send(Encoding.UTF8.GetBytes($"Hello {temp.Name}"));//подтверждаем что есть такой
                         ind = users.FindIndex(p => p.Id == ansver);
                         users[ind] = temp;
-                        isCorrect = true; break;
+                        isCorrect = true; break;//выходим из цикла
                     }
                     else
                     {
-                        client.Send(Encoding.UTF8.GetBytes("0"));
+                        client.Send(Encoding.UTF8.GetBytes("0"));//отправляем 0, значит не найден
                     }
                 }
 
-                while (client.Connected)
+                while (client.Connected)//пока есть соединение работаем на прием и передачу сообщений
                 {
                     var byffer = new byte[1024];
                     var l = client.Receive(byffer);
-                    var ansver = (Encoding.UTF8.GetString(byffer, 0, l));
+                    var ansver = (Encoding.UTF8.GetString(byffer, 0, l));//получаем сообщение от юзера в сообщении [id]
                     Console.WriteLine(ansver);
-                    string[] mas = ansver.Split(']');
+                    string[] mas = ansver.Split(']');//извлекаем его ID
                     mas[0] = mas[0].Trim('[');
                     //foreach (var item in mas)
                     //{
@@ -93,8 +94,8 @@ namespace Chat_Server
                     {
                         ind = int.Parse(mas[0]);
                     }
-                    ind = users.FindIndex(p => p.Id == ind);
-                    if (users[ind].socket!=null)
+                    ind = users.FindIndex(p => p.Id == ind);//находим получателя сообщения по ID
+                    if (users[ind].socket!=null)///если он в сети, будет соккет не нулевой
                     {
                         try
                         {
@@ -106,7 +107,7 @@ namespace Chat_Server
                             Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         }
                     }
-                    else client.Send(Encoding.UTF8.GetBytes("Юзер оффлайн!"));
+                    else client.Send(Encoding.UTF8.GetBytes("Юзер оффлайн!"));//если соккет налл отправляем ответ
                 }
 
             }
